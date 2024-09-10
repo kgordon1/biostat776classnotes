@@ -1,3 +1,5 @@
+#All of this work is done in an rmarkdown file using the Console.
+
 install.packages(c("bibtex", "RefManageR"))
 
 #Generate citation text for rmarkdown package by using the following command
@@ -7,6 +9,7 @@ citation("rmarkdown")
 citation("rmarkdown")[1]
 
 knitr::write_bib("rmarkdown", file = "my-refs.bib")
+
 
 list.files()
 

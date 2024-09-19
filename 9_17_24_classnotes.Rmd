@@ -1,0 +1,548 @@
+---
+title: "9_17_24"
+author: "Kate Gordon"
+date: "2024-09-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## ------------------------------------------------------------------------------------------------------------------------
+#Entering Input
+#At the R prompt we type expressions. The <- symbol is the assignment operator.
+#object is "x" and value is 1
+#print allows us to "see the object"
+#Base R does not use quotes
+```{r}
+x <- 1
+print(x)
+
+```
+```{r}
+x
+```
+##X's value is 1
+##x is a VECTOR and can have a lot of values
+##When we print the object, R tells us what is in the vector
+
+```{r}
+msg <- "hello"
+```
+
+ERROR MESSAGES
+##Grammar of the language determines whether an expression is complete or not.
+
+## ------------------------------------------------------------------------------------------------------------------------
+#| error: true
+```{r}
+x <-  ## Incomplete expression
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+We were 
+Error: <text>:2:0: unexpected end of input
+1: x <-  ## Incomplete expression
+   ^
+The # character indicates a comment.
+
+Anything to the right of the # (including the # itself) is ignored. This is the only comment character in R.
+
+Unlike some other languages, R does not support multi-line comments or comment blocks.
+
+Evaluation
+When a complete expression is entered at the prompt, it is evaluated and the result of the evaluated expression is returned.
+
+The result may be auto-printed.
+```{r}
+x <- 5  ## nothing printed
+x       ## auto-printing occurs
+print(x)  ## explicit printing
+```
+The [1] shown in the output indicates that x is a vector and 5 is its first element.
+
+Typically with interactive work, we do not explicitly print objects with the print() function; it is much easier to just auto-print them by typing the name of the object and hitting return/enter.
+
+However, when writing scripts, functions, or longer programs, there is sometimes a need to explicitly print objects because auto-printing does not work in those settings.
+
+When an R vector is printed you will notice that an index for the vector is printed in square brackets [] on the side. For example, see this integer sequence of length 20.
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+
+#| echo: false
+old <- options(width = 40)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+x <- 11:30
+x
+```
+Number 23 is the 13th element of the vector
+The numbers in the square brackets are not part of the vector itself, they are merely part of the printed output.
+
+
+
+Note: You can control how an object is printed for others when you write the code
+With R, it’s important that one understand that there is a difference between the actual R object and the manner in which that R object is printed to the console.
+
+Often, the printed output may have additional bells and whistles to make the output more friendly to the users. However, these bells and whistles are not inherently part of the object.
+
+```{r}
+5:0
+```
+```{r}
+-15:15
+```
+```{r}
+x <- 11:30
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+R Objects
+The most basic type of R object is a vector.
+
+**Atomic vectors:**
+
+logical: FALSE, TRUE, and NA
+integer (and doubles): these are known collectively as numeric vectors (or real numbers)
+complex: complex numbers
+character: the most complex type of atomic vector, because each element of a character vector is a string, and a string can contain an arbitrary amount of data
+
+**Lists:** which are sometimes called recursive vectors because lists can contain other lists.
+
+**There’s one other related object: NULL.**
+
+NULL is often used to represent the absence of a vector (as opposed to NA which is used to represent the absence of a value in a vector).
+NULL typically behaves like a vector of length 0.
+
+Create an empty vector
+Empty vectors can be created with the vector() function.
+
+Create a voctor with 4 items but not specifying any values yet
+```{r}
+vector(mode = "numeric", length = 4)
+```
+```{r}
+vector(mode = "logical", length = 4)
+```
+```{r}
+vector(mode = "character", length = 4)
+```
+Creating a non-empty vector
+The c() function can be used to create vectors of objects by concatenating things together.
+
+```{r}
+x <- c(0.5, 0.6)       ## numeric
+x <- c(TRUE, FALSE)    ## logical
+x <- c(T, F)           ## logical
+x <- c("a", "b", "c")  ## character  we know it is a character because it is in ""
+x <- 9:29              ## integer
+x <- c(1+0i, 2+4i)     ## complex   
+```
+
+
+**Note
+In the above example, T and F are short-hand ways to specify TRUE and FALSE.**
+
+However, in general, one should try to use the explicit TRUE and FALSE values when indicating logical values.
+
+The T and F values are primarily there for when you’re feeling lazy.
+
+
+**Lists**
+So, I know I said there is one rule about vectors:
+
+**A vector can only contain objects of the same class**
+
+But of course, like any good rule, there is an exception, which is a list (which we will get to in greater details a bit later).
+
+For now, just know a list is represented as a vector but can contain objects of different classes. Indeed, that’s usually why we use them.
+
+The main difference between atomic vectors and lists is that atomic vectors are homogeneous, while lists can be heterogeneous.
+
+```{r}
+leo_list <- list(1.5, "leo")
+leo_list
+```
+```{r}
+leo_list2 <- c(1.5, "leo")
+leo_list2
+```
+This saves both as a character.
+
+**Numerics**
+Integer and double vectors are known collectively as numeric vectors.
+
+In R, numbers are doubles by default.
+
+To make an integer, place an L after the number:
+
+```{r}
+typeof(4)
+```
+```{r}
+typeof(4L)
+```
+Let’s explore this. What is square of the square root of two? i.e. 
+```{r}
+x <- sqrt(2) ^ 2
+x
+```
+2 in this case is not an integer, it is a double
+
+Try subtracting 2 from x? What happened?
+the square root of 2 is an approximation in R, it will never be a whole number, so the answer will provide an integer that is larger than expected
+Any number with decimals i going to be an approximation
+R calculates things one step at a time
+
+```{r}
+x - 2
+```
+**Numbers**
+Numbers in R are generally treated as numeric objects (i.e. double precision real numbers).
+
+This means that even if you see a number like “1” or “2” in R, which you might think of as integers, they are likely represented behind the scenes as numeric objects (so something like “1.00” or “2.00”).
+
+This isn’t important most of the time…except when it is!
+
+If you explicitly want an integer, you need to specify the L suffix. So entering 1 in R gives you a numeric object; entering 1L explicitly gives you an integer object.
+
+There is also a special number Inf which represents infinity. This allows us to represent entities like 1 / 0. This way, Inf can be used in ordinary calculations; e.g. 1 / Inf is 0.
+
+The value NaN represents an undefined value (“not a number”); e.g. 0 / 0; NaN can also be thought of as a missing value (more on that later)
+
+
+
+
+#| echo: false
+options(old)
+
+Attributes
+R objects can have attributes, which are like metadata for the object.
+
+These metadata can be very useful in that they help to describe the object.
+
+For example, column names on a data frame help to tell us what data are contained in each of the columns. Some examples of R object attributes are
+
+names, dimnames
+dimensions (e.g. matrices, arrays)
+class (e.g. integer, numeric)
+length
+other user-defined attributes/metadata
+Attributes of an object (if any) can be accessed using the attributes() function. Not all R objects contain attributes, in which case the attributes() function returns NULL.
+
+However, every vector has two key properties:
+
+Its type, which you can determine with typeof().
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+letters
+```
+```{r}
+typeof(letters)
+```
+```{r}
+1:10
+```
+```{r}
+x <- list("a", "b", 1:10)
+x
+```
+[[1]] is an element of the list
+
+```{r}
+l <- list(1:20, list("leo", 5:15, letters))
+l
+```
+The list above has 2 elements but one of the elements has 3 parts
+
+```{r}
+length(x)
+```
+Length tells us how many elements in the vector.
+
+```{r}
+typeof(x)
+attributes(x)
+```
+
+
+Let’s use typeof() to ask what happens when we mix different classes of R objects together.
+**There is automatic coersion**
+
+```{r}
+y <- c(1.7, "a")
+y <- c(TRUE, 2)
+y <- c("a", TRUE)
+```
+
+y<- c(1.7, "a") R defaults the 1.7 to a character
+
+y <c(TRUE, 2)  defaults as a double
+
+y<- c("a", TRUE) defaults to character
+
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+typeof(y)
+```
+## ------------------------------------------------------------------------------------------------------------------------
+
+```{r}
+x <- 0:6
+typeof(x)
+as.logical(x)
+typeof(as.logical(x))
+```
+**Matrices**
+Matrices are vectors with a dimension attribute.
+
+The dimension attribute is itself an integer vector of length 2 (number of rows, number of columns)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+```{r}
+m <- matrix(nrow = 2, ncol = 3) 
+m
+```
+
+Dimension
+Rows, columns
+
+
+```{r}
+dim(m)
+```
+first dimension is rows = 2
+second dimension is columns = 3
+
+## ------------------------------------------------------------------------------------------------------------------------
+Matrices are constructed column-wise, so entries can be thought of starting in the “upper left” corner and running down the columns
+
+```{r}
+m <- matrix(1:6, nrow = 2, ncol = 3) 
+m
+```
+
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+## try it here 
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+Matrices can also be created directly from vectors by adding a dimension attribute.
+```{r}
+m <- 1:10 
+m
+dim(m) <- c(2, 5)
+m
+```
+
+## ------------------------------------------------------------------------------------------------------------------------
+Matrices can be created by column-binding or row-binding with the cbind() and rbind() functions.
+e.g. 
+
+Adding columns with cbind
+```{r}
+x <- 1:3
+y <- 10:12
+cbind(x, y)
+```
+```{r}
+x <- 1:3
+y <- 10:12
+rbind(x, y)
+```
+Above is an rbind() to row bind x and y above.
+
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+Lists
+Lists are a special type of vector that can contain elements of different classes. Lists are a very important data type in R and you should get to know them well.
+
+Pro-tip
+Lists, in combination with the various “apply” functions discussed later, make for a powerful combination.
+
+Lists can be explicitly created using the list() function, which takes an arbitrary number of arguments.
+
+```{r}
+x <- list(1, "a", TRUE, 1 + 4i) 
+x
+```
+We can also create an empty list of a prespecified length with the vector() function
+```{r}
+x <- vector("list", length = 5)
+x
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+Factors
+Factors are used to represent categorical data and can be unordered or ordered. One can think of a factor as an integer vector where each integer has a label.
+
+Pro-tip
+Factors are important in statistical modeling and are treated specially by modelling functions like lm() and glm().
+
+Using factors with labels is better than using integers because factors are self-describing.
+
+Pro-tip
+Having a variable that has values “Yes” and “No” or “Smoker” and “Non-Smoker” is better than a variable that has values 1 and 2.
+
+Factor objects can be created with the factor() function.
+
+```{r}
+x <- factor(c("yes", "yes", "no", "yes", "no")) 
+x
+table(x) 
+```
+Adds a summary called LEVELS
+
+table(x) is the number of characters
+
+## See the underlying representation of factor
+to look at the structure behind the factor x
+```{r}
+unclass(x) 
+```
+values for "yes" is the number 2
+
+Base level is always 1 instead of zero
+ 
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+Often factors will be automatically created for you when you read in a dataset using a function like read.table().
+
+Those functions often default to creating factors when they encounter data that look like characters or strings.
+The order of the levels of a factor can be set using the levels argument to factor(). This can be important in linear modeling because the first level is used as the baseline level.
+## try it here 
+
+```{r}
+x <- factor(c("yes", "yes", "no", "yes", "no"))
+x  ## Levels are put in alphabetical order
+```
+
+```{r}
+x <- factor(c("yes", "yes", "no", "yes", "no"),
+            levels = c("yes", "no"))
+x
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+**Missing Values**
+Missing values are denoted by NA or NaN for undefined mathematical operations.
+
+is.na() is used to test objects if they are NA
+
+is.nan() is used to test for NaN
+
+NA values have a class also, so there are integer NA, character NA, etc.
+
+A NaN value is also NA but the converse is not true
+
+```{r}
+## Create a vector with NAs in it
+x <- c(1, 2, NA, 10, 3)  
+## Return a logical vector indicating which elements are NA
+is.na(x)    
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+## Now create a vector with both NA and NaN values
+x <- c(1, 2, NaN, NA, 4)
+is.na(x)
+is.nan(x)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+x <- data.frame(foo = 1:4, bar = c(T, T, F, F)) 
+x
+nrow(x)
+ncol(x)
+attributes(x)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+data.matrix(x)
+attributes(data.matrix(x))
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+#| message: false
+# try it yourself
+
+library(tidyverse)
+library(palmerpenguins)
+penguins 
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+x <- 1:3
+names(x)
+names(x) <- c("New York", "Seattle", "Los Angeles") 
+x
+names(x)
+attributes(x)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+x <- list("Los Angeles" = 1, Boston = 2, London = 3) 
+x
+names(x)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+m <- matrix(1:4, nrow = 2, ncol = 2)
+dimnames(m) <- list(c("a", "b"), c("c", "d")) 
+m
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+colnames(m) <- c("h", "f")
+rownames(m) <- c("x", "z")
+m
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+options(width = 120)
+sessioninfo::session_info()
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

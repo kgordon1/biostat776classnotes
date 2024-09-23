@@ -11,18 +11,31 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-#which column gets recycled?
+#which column gets recycled? "c" - it contains 1 ans so does "a"
 
 library("tibble")
 tibble(
 a = 1:5,
 b = 6:10, 
 c = 1, 
-z = (a+b)^z +c
+z = (a+b)^2 +c
 )
+
+# A tibble: 5 × 4
+#      a     b     c     z
+#  <int> <int> <dbl> <dbl>
+#1     1     6     1    50
+#2     2     7     1    82
+#3     3     8     1   122
+#4     4     9     1   170
+#5     5    10     1   226
+# Answer shows one plus 6. That's 7, if you square it. That's 49 you and then add one. That's how you get 50 over here. 
+
+
 
 #What is length of y? 10
 #rnorm generates random numbers from a normal distribution
+# you can see the values or arguments for rnorm using "args(rnorm)"
 
 set.seed(20240919)
 data.frame(
@@ -31,7 +44,8 @@ y = rnorm(10),
 in_group = c(TRUE, FALSE)
 )
 
-#Will this work?  True False True False
+#rnorm is used to generate random numbers for the normal distribution.
+#Will this work?  Yes because in_group is a vector with length 2, which divides into 10 and 10, which are the lengths of "x" and "y"it will give you a sequence of True False True False
 # How will in_group look like?
 
 set.seed(20240919)
@@ -45,7 +59,7 @@ in_group = c(TRUE, FALSE, NA)
 #recycling will not work here
 
 # the error is: Error in data.frame(x = 1:10, y = rnorm(10), in_group = c(TRUE, FALSE,  : 
-  #arguments imply differing number of rows: 10, 3
+#arguments imply differing number of rows: 10 (for x and y), 3 (for in_grou)
   
 
 
@@ -58,11 +72,26 @@ Mix of vectors
 Data frames are used to store tabular data in R. They are an important type of object in R and are used in a variety of statistical modeling applications. Hadley Wickham’s package dplyr has an optimized set of functions designed to work efficiently with data frames.
 
 Data frames are represented as a special type of list where every element of the list has to have the same length.
+Typically.
+what it looks like is, you have different columns
+that each of those columns are vectors of different types
+e.g in example below foo and bar are both columns in the data frame
 
 ```{r}
 x <- data.frame(foo = 1:4, bar = c(T, T, F, F)) 
 x
 ```
+
+Once we have a data frame or a matrix, we can use the functions "nrow" and "ncol"
+to extract the number of rows and number of columns.
+
+```{r}
+nrow(x)
+```
+```{r}
+ncol(x)
+```
+
 
 ```{r}
 attributes(x)
@@ -73,19 +102,30 @@ Converts columns to all of the same type of object
 ```{r}
 data.matrix(x)
 ```
-
-Transfers TRUE / FAlse into 1/0
+You're start with a data frame. And you want a matrix.
+you can use a data.matrix function for coercing data frame into a matrix.
+What will this do? It will like convert all of your columns
+to the type that can handle all of the different types of objects that you have
+in this case the logical vector (True or False), can be represented as an integer.
+So that's what it does here. It recognizes that that will be the simplest version possible. And so it transforms our Truths into Ones or Falses into Zeros
+Transfers TRUE / False into 1/0
 
 Can just select integer columns and convert into a matrix
-
-
 ```{r}
 attributes(data.matrix(x))
 ```
+Above we have a matrix where we look at the attributes. We have the dims plot, the dimension names
+
+Let's say you have several like integer columns. 
+You might want to just select those and then that converted into a matrix.
+If we just want to extrac the columns of my data frame X that are integers.
+I can use the "data.matrix" funtion and convert it into a matrix. This would be an example here where you're automatically upsetting all of your internal columns. nd later on you can use for some other function.
+Look at R Console for correct interpretation where T/F does not show up
+
 ```{r}
 x <- data.frame(foo = 1:4, bar = c(T, T, F, F),
                 leo = 2:5)
-data.matrix (x[, sapply(x, is.integer)])
+data.matrix(x[, sapply(x, is.integer)])
 x
 ```
 
@@ -98,6 +138,12 @@ Here is an example of assigning names to an integer vector.
 x <- 1:3
 names(x)
 ```
+Above is a "null vector"
+
+You can assign a vector names  calling the "names" function, then the left arrow for assignment
+and providing a vector of equal length to the actual vector that you're working with.
+Or just recycle the names. 
+Once you do that, we print text, we'll get  the name of the observation
 ```{r}
 names(x) <- c("New York", "Seattle", "Los Angeles") 
 x
@@ -107,29 +153,47 @@ Name of attribute Character name
 ```{r}
 attributes(x)
 ```
-Subset by name
+
+Subset by name (e.g  I just want the observation for Seattle.)
 ```{r}
 names(x) <- c("New York", "Seattle", "Los Angeles") 
 x["Seattle"]
 ```
+The difference between the one square bracket versus double. The double square bracket is  no longer returning the name, just the observation.
+
+```{r}
+x[["Seattle"]]
+```
 
 
 Lists can also have names, which is often very useful.
+You can put list names before the actual vectors that you're providing to the list or the objects that you're providing to your list on the left side of the equal sign.
+this equal sign syntax. 
 
 ```{r}
 x <- list("Los Angeles" = 1, Boston = 2, London = 3) 
 x
 ```
-Matrices can have both column and row names.
+You can also use it with the C function for combining.
 
+```{r}
+c("morning" = 5, "night" = 8)
+```
+
+
+Matrices can have both column and row names.
+You can also do this for your matrices where you can specify the dimensions within names. You can specify in a list the names of your columns as your rows. .
 ```{r}
 m <- matrix(1:4, nrow = 2, ncol = 2)
 dimnames(m) <- list(c("a", "b"), c("c", "d")) 
 m
 ```
-c("morning")
 
+That syntax, though, is quite complicated. People mostly use the helper functions called call names and row names.
+These are equivalent to that names function that we saw earlier for regular vectors. But now this works for matrices
 Column names and row names can be set separately using the colnames() and rownames() functions.
+
+These are equivalent to that names function that we saw earlier for regular vectors. But now this works for matrices.
 
 ```{r}
 colnames(m) <- c("h", "f")
@@ -139,15 +203,14 @@ m
 DATA FRAME NAMES
 For data frames, there is a separate function for setting the row names, the row.names() function.
 
-Also, data frames do not have column names, they just have names (like lists).
-
-So to set the column names of a data frame just use the names() function. Yes, I know its confusing.
+Also, data frames do not have column names, they just have names. 
+To set the column names of a data frame just use the names() function. 
 
 Here’s a quick summary:
 
-Object	Set column names	Set row names
-data frame	names()	row.names()
-matrix	colnames()	rownames()
+Object	     Set column names	  Set row names
+data frame	  names()	          row.names()
+matrix	      colnames()	      rownames()
 
 
 
@@ -155,25 +218,30 @@ matrix	colnames()	rownames()
 ## ------------------------------------------------------------------------------------------------------------------------
 
 Control Structures
+we want to write code that is flexible enough to handle more than one situation.
 Control structures in R allow you to control the flow of execution of a series of R expressions.
+The words we use to do this are: if and else, for, while, Repeat, break, and next
 
+If-else
+Allows us to write a single r script that handles 2 different scenarios, instead of having an R Script for scenario one, and then an R Script for scenario 2
 
+```{r}
 if(<condition>) {
         ## do something
 } 
 ## Continue with rest of code
+```
 
-The above code does nothing if the condition is false. If you have an action you want to execute when the condition is false, then you need an else clause.
+That is just a simple branching point with an if, or we were handling whether the condition is true or not. The above code does nothing if the condition is false. If you have an action you want to execute when the condition is false, then you need an else clause.
 
-if(<condition>) {
-        ## do something
-} 
-else {
-        ## do something else
-}
+With if-else,  you can handle \situations where if the condition is true, you'll do something.
+
+If it isn't truw , you'll do something else.
+You can combine if-else  in a nested way: You have an if, followed by an else if, so you have 2 different conditions, followed by lan else which is a 3rd condition.
 
 You can have a series of tests by following the initial if with any number of else ifs.
 
+```{r}
 if(<condition1>) {
         ## do something
 } else if(<condition2>)  {
@@ -183,16 +251,25 @@ if(<condition1>) {
 }
 x <- runif(n = 1, min = 0, max = 10)
 x
+```
+
+The conditions here have to be r code that returns a logical vector with a length of one
+for this to work.
 
 
-## Review %in% operator:
-#it returns a vector with length equal to the 
-# length of the left side vector to the %in%
+Review %in% operator:
+it returns a vector with length equal to the length of the left side vector to the %in%
 
-
+The %in% operator is going to return a logical vector
+but of length equal to the length of of the object on the left side of the %in%.
+So below, the left side is a character vector of length one.
+And the output of this call is going to be a logical vector of length one.
 ```{r}
 "b" %in% letters
 ```
+
+The reverse shown below has letters as the vector, of length 26. 
+So by doing letters in B, we're going to get logical vector of length 26 which is not what you want for an if else condition 
 ```{r}
 letters %in% "b" 
 ```
@@ -201,13 +278,26 @@ This gives a logical vector of length 26
 Here is an example of a valid if/else structure.
 
 Let’s use the runif(n, min=0, max=1) function which draws a random value between a min and max value with the default being between 0 and 1.
+"runif"is the function for generating a random random numbers from the uniform distribution
+where you specify a minimum value for the numbers that you want possible, and a maximum value, as well as how many numbers you want here. 
+Here we only want one of them (n = 1)
 
 ```{r}
 x <- runif(n = 1, min = 0, max = 10)
 x
 
 ```
-Then, we can write and if-else statement that tests whethere x is greater than 3 or not.
+In this case, when I ran it and I got 3.5,
+
+We can ask if that number is greater than 3.
+Similar to the %in% operator, this is going to return a logical vector, of length equal to the length of the vector on the left side.
+So in this case it was length one.
+So in this case we we get a true
+
+```{r}
+x > 3
+```
+We can write an if-else statement that tests whether x is greater than 3 or not.
 
 ```{r}
 if (x > 3) {
@@ -216,13 +306,11 @@ if (x > 3) {
     y <- 0
 }
 
-y
+y #prints what the y value is
 ```
-```{r}
-c("a". "ch", "b") %in% letters
-ifelse(c("a", "ch", "b"))
-```
-
+If X is greater than 3, and we are working with y of 10. If not, say we're working with y of 0.
+Since our first conditional value was true, the only code that gets executed is a code which is assigning 10 to y.
+So if we check after that, if else code, we can see that Y has a value of 10 in this particular case. If you run it again. Since this is a random uniform, you could get a different result than the one we first get.
 
 This expression can also be written a different (but equivalent!) way in R.
 ```{r}
@@ -232,11 +320,15 @@ y <- if (x > 3) {
     0
 }
 
-y
+y #prints what the y value is
 ```
 
 Of course, the else clause is not necessary. You could have a series of if clauses that always get executed if their respective conditions are true.
 
+
+Else's sometimes are not necessary. You could just write sequential ifs.
+HOwever, when you write an "if", followed by an else if that is hard to just write with just sequential lists, you might have to have like more complicated conditions and how you're testing things.
+```{r}
 if(<condition1>) {
 
 }
@@ -245,8 +337,23 @@ if(<condition2>) {
 
 }
 
+```
 
+What about "ifelse" syntax, what is the difference?
+If and else described above is for conditional flow of code and output of the condition had to be a vector of length ONE.
+The function "ifelse" is for computing a vectorized output based on a sense of what you're testing on conditions.
+With the "ifelse" function you can test something many different times. 
+So let's let's go back to thie letter  example. 
+if else "a", "ch", "b" in letters, If it is true, I'll say woo, if not I'll say boo.
 
+```{r}
+c("a", "ch", "b") %in% letters
+ifelse(c("a", "ch", "b") %in% letters, "woo", "boo")
+```
+So now that we have this vector, a logical vector, of length three. The "ifelse" function is working in a vectorized way. So it's working for every value of the vector and says if it's true, we'll return "woo: if it's false, we will return "in this case "boo". 
+And so you get a vector of length 3 that matches the the infrastructure like that you have.
+
+NOTE:  typically when  writing if-else code, put the else on the same line as a curly bracket so that it's in there prior to it, so that you remember to execute the next lines of code.
 
 ## ------------------------------------------------------------------------------------------------------------------------
 
@@ -264,11 +371,13 @@ penguins
 ## ------------------------------------------------------------------------------------------------------------------------
 
 for Loops
-For loops are pretty much the only looping construct that you will need in R. While you may occasionally find a need for other types of loops, in my experience doing data analysis, I’ve found very few situations where a for loop was not sufficient.
+Another word to control code flow is "for"
 
-"For loop" has the most practical utility
+This is when you want to execute the same lines of code "for" different inputs.
 
-In R, for loops take an iterator variable and assign it successive values from a sequence or vector.
+"For loops" are pretty much the only looping construct that you will need in R. 
+
+In R, "for loops" take an iterator variable and assign it successive values from a sequence or vector.
 
 For loops are most commonly used for iterating over the elements of an object (list, vector, etc.)
 
@@ -277,7 +386,22 @@ for (i in 1:10) {
     print(i)
 }
 
-This "in" should not be confused with the %in%
+You give (i in X:XX) a variable that will be internally updated in your for loop, or after this "in" operator for every unique value on whatever vector you have on the right side.
+
+In the example below, you want to loop through our vector that has integrated values, 1 through 10, each time that we're looking through these values we're going to assign them to "i"
+What do we want to do with "i"? 
+In this case, inside of the curly brackets, we just want to print it.
+So the 1st time "i" gets assigned the value one and then it gets printed.
+The second time "i" gets assigned a value 2 and then it gets printed. 
+
+This "in" should not be confused with the %in%. This "in" only works inside of that "for" function.
+
+```{r}
+for (i in 1:10) {
+    print(i)
+}
+```
+To show it to you a bit more slowly for each run of "i", use Sys.sleep(1)
 ```{r}
 for (i in 1:10) {
     print(i)
@@ -296,6 +420,13 @@ This loop takes the i variable and in each iteration of the loop gives it values
 
 The following three loops all have the same behavior.
 
+Let's say we have a vector that has letters. 
+In this case the letters a through the you might want your if variable, like the the environment that is getting updated in your for loop to just point to the position of the vector not the actual value of in that vector that could be useful in in some programming scenarios. 
+In this particular example, we create our vector, X, that exists outside of the "for loop".
+And we're going to subset it to the position, "i" with a square bracket syntax. 
+Once we have that we're just printing it.
+So here we we created our vector but then, when we ran the "in", we had to manually create an integral vector, that matched the length of our alphabet vector "x". 
+
 ```{r}
 ## define the loop to iterate over
 x <- c("a", "b", "c", "d")
@@ -306,14 +437,16 @@ for (i in 1:4) {
     print(x[i])
 }
 ```
-
-
-
-
 ## ------------------------------------------------------------------------------------------------------------------------
 
 ## ------------------------------------------------------------------------------------------------------------------------
+But that can be tedious. So we might use a helper function called "seq_along"
+"seq_along" function returns an integral vector of length equal to the input vector that you're providing. And it just provides a index numbers for that vector.
 
+So  you don't need say, like, Hey, where do they want to start? Which is one?
+What is the length of my vector X? which in this case was 4. 
+You don't need to know that w/ "seq_along". 
+Your code will be a lot more flexible for future scenarios where, like maybe change the length of X and your call code will still work with "seq_along"
 We can also print just the iteration value (i) itself
 ```{r}
 x
@@ -329,7 +462,7 @@ The seq_along() function is commonly used in conjunction with for loops in order
 for (i in seq_along(x)) {
     print(x[i])
 }
-
+This code works and it doesn't matter if I change later, the length of of X, either.
 ```{r}
 ## define the loop to iterate over
 x <- c("a", "b", "c", "d")
@@ -344,9 +477,17 @@ for (i in seq_along(x)) {
 }
 ```
 ** Must use PRINT function to see output**
+Notice in all of these abovestatements, we're using the print function internally of inside of the curly brackets.
+We have implicit and explicit printing
+And so in this case, like the what we've been seeing in in the class so far today, where we use a print statement inside of a for loop, we see the values get printed sequentially.
+You do want to have explicit printing in "for loops".  meaning use "print()"
+
+NOTE FOR GGPLOT OUTPUT: The same thing will happen with like a Gpl. Let's say you have a for loop, and you're making plots in internally. They're not gonna get printed unless you use the print function on on your G plot output.  Also "for loops" are helpful if you want to make the same type of plot, but just changing a variable.
 
 ## ------------------------------------------------------------------------------------------------------------------------
-
+We've been using "i" for the variable that gets updated in every instance of our for loop.
+But You can call it anything you want.
+BUT you have to actually use characters. You cannot use numbers. You have to use letters.
 ```{r}
 for (babyshark in x) {
     print(babyshark)
@@ -380,23 +521,39 @@ for (i in 1:4) print(x[i])
 ```
 
 However, I like to use curly braces even for one-line loops, because that way if you decide to expand the loop to multiple lines, you won’t be burned because you forgot to add curly braces (and you will be burned by this).
-
-
-## ------------------------------------------------------------------------------------------------------------------------
-# try it yourself
-
+So it's it's just easiest to to always use the curly brackets when you're using force, even if if it involves extra in the print.
 
 ## ------------------------------------------------------------------------------------------------------------------------
+we wanted to print the the element of the "i-th" element of X in this case.
+We have this vector that we defined earlier is the vector X had a Abcd and in this for loop, we're just printing the "i-th" element X, would we not get the same output without the X.
 
-Nested for loops
-for loops can be nested inside of each other.
+```{r}
+for (i in 1:4) print (x[i])
+```
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+Nested "for loops"
+"for loops" can be nested inside of each other.
+
+let's say you're working with a matrix that has 2 dimensions. Maybe you want to do something for every row but then also inside of every row. Now you want to work in every column.
+So that's this scenario here, where we have this matrix that has 2 rows, 3 columns.
 
 ```{r}
 x <- matrix(1:6, nrow = 2, ncol = 3)
 x
 ```
+Below we're using a "for loop" 
+The variable that we're gonna store that "for loop" is going to be called "i". 
+And we're doing this for the different rows of our matrix "x", 
+and then we're doing something for the the columns of our matrix inside of those 2 "for loops". 
+So inside of the second curly bracket there, we're actually running some codes. 
+In this case, we're printing the ith,J element of our matrix.
+
 Printing the ith, j 
 The j index goes across the columns. That’s why we values 1, 3, etc.
+
+BUT it can be hard to understand your code if you go beyond 2 dimensions.
 
 ```{r}
 for (i in seq_len(nrow(x))) {
@@ -407,21 +564,21 @@ for (i in seq_len(nrow(x))) {
 ```
 
 
-
 ## ------------------------------------------------------------------------------------------------------------------------
 
-
-
-## ------------------------------------------------------------------------------------------------------------------------
-
-while Loops
-while loops begin by testing a condition.
+"while Loops"
+"while loops" begin by testing a condition.
 
 If it is true, then they execute the loop body.
 
+Useful when you specify a variable outside of the while loop with an initial value.
+Then you have a condition that uses that same variable and inside of your file loop you update
+that might roll again. 
+so that you have to have all of these 3 components for a pilot like a variable where  you're gonna store information that you keep track of across your loop. You use that variable for your condition and then update it internally.
+
 Once the loop body is executed, the condition is tested again, and so forth, until the condition is false, after which the loop exits.
 
-Let's start with x = 0, while the count is <10, add 1 until you get to 9
+In this example, let's start with x = 0, while the count is <10, add 1 until you get to 9
 ```{r}
 count <- 0
 while (count < 10) {
@@ -429,6 +586,10 @@ while (count < 10) {
     count <- count + 1
 }
 ```
+let's start with a 0. And "while this remains true", meaning, while count is less than 10, let's print it. 
+Once we're done printing it, let's update it. In this case we added a plus one to count and so we can see that. 
+Well, count was 0, that was still less than 10. So we printed the value, but one was less than 10. We printed a value. ...after looping at 8, that value became 9. That was still less than 10. We printed it and then 9 plus one became 10, but 10 is not less than 10. It is equal to 10, and that's what that's when the "while" code stopped.
+
 ## ------------------------------------------------------------------------------------------------------------------------
 z <- 5
 set.seed(1)
@@ -447,24 +608,17 @@ print(z)
 
 ## ------------------------------------------------------------------------------------------------------------------------
 
-repeat Loops
+"repeat Loops"
 repeat initiates an infinite loop right from the start. These are not commonly used in statistical or data analysis applications, but they do have their uses.
 
 
 IMPORTANT (READ THIS AND DON’T FORGET… I’M SERIOUS… YOU WANT TO REMEMBER THIS.. FOR REALZ PLZ REMEMBER THIS)
 The only way to exit a repeat loop is to call **break**.
 
-
--2:2
-((-2:2) >= 0) & ((-2:2) <= 0)
-
-
-## ------------------------------------------------------------------------------------------------------------------------
-(2 >= 0) && (-2 <= 0)
-(-2 >= 0) && (-2 <= 0)
+Inside you have an "if" statement where, if that is true, you'll use break to break out of the loop. You can also use break on a while loop or in a for loop. and it's typically used either on whiles or on a repeat. If if you never specify a break.Your code is never going to stop 
+right?
 
 
-## ------------------------------------------------------------------------------------------------------------------------
 ```{r}
 x0 <- 1
 tol <- 1e-8
@@ -498,8 +652,13 @@ repeat {
 ## ----eval=FALSE,prompt=FALSE---------------------------------------------------------------------------------------------
 
 **next, break**
-next is used to skip an iteration of a loop.
+"next" is used to skip an iteration of a loop.
 
+we we're working with a vector, that has length 100 and we're doing some estimation. But we want to avoid, like the very 1st few rounds for improving our estimate of of some value.
+Let's say we you're working with like a Markov chain.
+In that scenario you could say, I want to have a burning period, so I want to skip the 1st 20 iterations.
+in inside of this, if we have the next statement, which is like, Okay since we've reached that just don't do anything more on this iteration of the "for loop". Just go to the next iteration.
+So it won't run any of the code that we have after the word "next" on the first 20 iterations but then we do something here with the iterations after the 20th.
 ```{r}
 for (i in 1:100) {
     if (i <= 20) {
@@ -511,6 +670,7 @@ for (i in 1:100) {
 ```
 
 break is used to exit a loop immediately, regardless of what iteration the loop may be on.
+You could also have the break here where, like even though we were working on a hundred iterations. Once we reach the 20th iteration, we can say like, Hey, I don't want to keep working on this anymore. Let's just stop
 
 ```{r}
 for (i in 1:100) {
@@ -620,17 +780,53 @@ Sometimes, argument values are rarely modified (except in special cases) and it 
 Here, for example, we could set the default value for num to be 1, so that if the function is called without the num argument being explicitly specified, then it will print “Hello, world!” to the console once.
 
 ```{r}
-f <- function(num = 1) {
+Helloworldf <- function(num) {
     hello <- "Hello, world!\n"
     for (i in seq_len(num)) {
         cat(hello)
     }
-    chars <- nchar(hello) * num  #times the number, in this case 1
+    chars <- nchar(hello) * num  #times the number, in sample this case below, 3
     chars
 }
 
+meaningoflife <- Helloworldf(3)
 
+print(meaningoflife)
+
+
+#the answer is the total number of characters when you print Hello! Common world! Three times is actually 42, which is a joke based on the hitch hikers guideto the galaxy.
+
+#maybe you want to make it easy for people to to run these functions in the future.
+#so we can specify a default value for them.
+#The way you do that is, with the equal sign.
+#inside of the function call. So here we're going to specify that the default value of Num is one
 f() ## Use default value for 'num'
+
+Helloworldf <- function(num = 1) {
+    hello <- "Hello, world!\n"
+    for (i in seq_len(num)) {
+        cat(hello)
+    }
+    chars <- nchar(hello) * num  #times the number, in sample this case below, 3
+    chars
+}
+
+#The way you do that is, with the equal sign inside of the function call. 
+#So here we're going to specify that the default value of Num is one
+#and so later on, if someone uses that function without specifying any inputs.
+# The the code works right? in general also, like specifying default values or our functions # makes it easier for people to think about what are the things they need to specify.
+
+#We have written a function that 
+#has one formal argument named num with a default value of 1. The formal arguments are the #arguments included in the function definition.
+#prints the message “Hello, world!” to the console a number of times 
+#indicated by the argument num 
+#returns the number of characters printed to the console
+
+Helloworldf(2)
+#returns 
+#Hello, world!
+#Hello, world!
+#[1] 28
 ```
 
 ## ------------------------------------------------------------------------------------------------------------------------

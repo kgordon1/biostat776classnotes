@@ -1,0 +1,1135 @@
+---
+title: "9_24_23_classnotes"
+author: "Kate Gordon"
+date: "2024-09-24"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Code written by the person who made the function f()
+f <- function(num) {
+  hello <- "Hello, world!\n"
+  for (i in seq_len(num)) {
+    cat(hello)
+  }
+  chars <- nchar(hello) * num
+  chars
+}
+## Code written by the user of f() did not create a default value
+f()
+## Users are forced to specify a value for the argument "num"
+f(num = 2)
+f(2)
+f("a")
+## Create a version of f() with a default value for "num"
+## (here we have the default as 1)
+f <- function(num = 1) {
+  hello <- "Hello, world!\n"
+  for (i in seq_len(num)) {
+    cat(hello)
+  }
+  chars <- nchar(hello) * num
+  chars
+}
+## Using f() with no "num" in our global environment
+stopifnot(!"num" %in% ls()) ## formally check that "num"
+## doesn't exist
+f() ## "num" will be created inside of the function f()
+## with the default value of 1
+f(num = 3) ## Use the code inside f() with num = 3
+num <- 4
+f() ## Here even though "num" exists on the global
+## environment, "num" inside f() uses the default value of 1
+## We could have called our argument "number_of_iterations"
+## instead of "num"
+f <- function(number_of_iterations = 1) {
+  hello <- "Hello, world!\n"
+  for (i in seq_len(number_of_iterations)) {
+    cat(hello)
+  }
+  chars <- nchar(hello) * number_of_iterations
+  chars
+}
+f("a")
+f(0)
+f(1)
+f <- function(number_of_iterations = 1) {
+  ## Check that the user provided the right type of input
+  stopifnot(is.numeric(number_of_iterations))
+  stopifnot(number_of_iterations >= 1)
+  hello <- "Hello, world!\n"
+  for (i in seq_len(number_of_iterations)) {
+    cat(hello)
+  }
+  chars <- nchar(hello) * number_of_iterations
+  chars
+}
+f("a")
+f(0)
+f(1)
+
+
+#Arguments
+
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+str(rnorm)
+mydata <- rnorm(100, 2, 1) ## Generate some data
+```
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+## Positional match first argument, default for 'na.rm'
+sd(mydata)
+## Specify 'x' argument by name, default for 'na.rm'
+sd(x = mydata)
+## Specify both arguments by name
+sd(x = mydata, na.rm = FALSE)
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+## Specify both arguments by name. This way you can switch positions and get the same value
+sd(na.rm = FALSE, x = mydata)
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+```{r}
+sd(na.rm = FALSE, mydata) #once we have used a named argument, R looks at the first remaining argument for our data call
+```
+
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+```{r}
+args(f) #shows default values of function
+```
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+Below is the argument list for the lm() function, which fits linear models to a dataset.
+
+NULL
+```{r}
+args(lm)
+```
+The following two calls are equivalent.
+
+```{r}
+lm(data = mydata, y ~ x, model = FALSE, 1:100)
+lm(y ~ x, mydata, 1:100, model = FALSE)
+```
+
+most useful model is:
+lm(y ~ x, mydata, 1:100, model = FALSE)
+## ------------------------------------------------------------------------------------------------------------------------
+**Functions are for humans and computers**
+As you start to write your own functions, it’s important to keep in mind that functions are not just for the computer, but are also for humans. Technically, R does not care what your function is called, or what comments it contains, but these are important for human readers.
+
+The name of a function is important
+In an ideal world, you want the name of your function to be short but clearly describe what the function does. This is not always easy, but here are some tips.
+
+The function names should be verbs, and arguments should be nouns.
+
+There are some exceptions:
+
+nouns are ok if the function computes a very well known noun (i.e. mean() is better than compute_mean()).
+A good sign that a noun might be a better choice is if you are using a very broad verb like “get”, “compute”, “calculate”, or “determine”. 
+Use your best judgement and do not be afraid to rename a function if you figure out a better name later.
+
+## # Too short
+```{r}
+f()
+```
+## 
+## # Not a verb, or descriptive
+```{r}
+my_awesome_function()
+```
+
+## 
+## # Long, but clear
+```{r}
+impute_missing()
+collapse_years()
+```
+
+
+## 
+## 
+**snake_case vs camelCase**
+If your function name is composed of multiple words, use “snake_case”, where each lowercase word is separated by an underscore.
+
+“camelCase” is a popular alternative. It does not really matter which one you pick, the important thing is to be consistent: pick one or the other and stick with it.
+
+R itself is not very consistent, but there is nothing you can do about that. Make sure you do not fall into the same trap by making your code as consistent as possible.
+
+```{r}
+# Never do this! Do not use both snake_case and camelCase in same code
+#be consistent
+col_mins <- function(x, y) {}
+rowMaxes <- function(x, y) {}
+```
+
+**Use a common prefix**
+If you have a family of functions that do similar things, make sure they have consistent names and arguments.
+
+It’s a good idea to indicate that they are connected. That is better than a common suffix because autocomplete allows you to type the prefix and see all the members of the family.
+
+```{r}
+# Good
+input_select()
+input_checkbox()
+input_text()
+
+# Not so good
+select_input()
+checkbox_input()
+text_input()
+```
+
+**Avoid overriding exisiting functions**
+Where possible, avoid overriding existing functions and variables.
+
+It is impossible to do in general because so many good names are already taken by other packages, but avoiding the most common names from base R will avoid confusion.
+
+```{r}
+# Don't do this!
+T <- FALSE #this replaces True value and can break code for people later
+c <- 10 #c is used uiversally for combining
+mean <- function(x) sum(x)
+```
+
+**Use comments**
+Use comments are lines starting with #. They can explain the “why” of your code.
+
+You generally should avoid comments that explain the “what” or the “how”. If you can’t understand what the code does from reading it, you should think about how to rewrite it to be more clear.
+
+Do you need to add some intermediate variables with useful names?
+Do you need to break out a subcomponent of a large function so you can name it?
+However, your code can never capture the reasoning behind your decisions:
+
+Why did you choose this approach instead of an alternative?
+What else did you try that didn’t work?
+It’s a great idea to capture that sort of thinking in a comment.
+
+You can examine function names / uses using "apropos" or "help"
+
+**Environment**
+The last component of a function is its environment.
+
+This is not something you need to understand deeply when you first start writing functions. However, it’s important to know a little bit about environments because they are crucial to how functions work.
+
+The environment of a function controls how R finds the value associated with a name.
+
+For example, take this function:
+
+**Tips for exploring functions**
+1. Remember what package something came from 
+```{r}
+help(package = "usethis")
+```
+2. Look at function names listed in help
+3. Look at examples under functions in help
+4. You can also keep a list of packages and their functions in your own files
+
+
+**Vectorization**
+Writing for and while loops are useful and easy to understand, but in R we rarely use them.
+
+As you learn more R, you will realize that vectorization is preferred over for-loops since it results in shorter and clearer code.
+
+Vector arithmetics
+
+**Rescaling a vector**
+In R, arithmetic operations on vectors occur element-wise. For a quick example, suppose we have height in inches:
+
+```{r}
+inches <- c(69, 62, 66, 70, 70, 73, 67, 73, 67, 70)
+```
+
+inches <- c(69, 62, 66, 70, 70, 73, 67, 73, 67, 70)
+
+and want to convert to centimeters.
+```{r}
+inches * 2.54
+```
+Notice what happens when we multiply inches by 2.54:
+
+inches * 2.54
+
+ [1] 175.26 157.48 167.64 177.80 177.80 185.42 170.18 185.42 170.18 177.80
+In the line above, we multiplied each element by 2.54.
+
+You can do this with addition or subtraction also in R without using loops or with statements.
+
+
+**Two vectors**
+
+If we have two vectors of the same length, and we sum them in R, they will be added entry by entry as follows:
+
+```{r}
+x <- 1:10
+y <- 1:10
+x + y
+```
+it added x1 + y 1 = 1+1 = 2, x2+y2 = 2+2 = 4...
+
+The same holds for other mathematical operations, such as -, * and /.
+
+```{r}
+x <- 1:10
+sqrt(x)
+```
+
+That is, we don’t write a for loop that takes each element of x and each element of y, adds, them up, then puts them all in a single vector.
+```{r}
+y <- 1:10
+x * y
+```
+
+This is the same for things like square root - you can have a vector and just use the notation and it will run the function.
+
+```{r}
+x <- 1:10
+sqrt(x)
+```
+This shows the square root of 1 , the square root of 2, the sqrt of 3...
+
+In many other programs, you have to create a "for loop" to do these types of functions.
+Such as:
+ for each of the elements in X, 
+ I want to compute 
+ the sum of that ith element of x plus the ith element of y, 
+ and save it to the ith element of my result.
+ Seen as:
+ for (i in seq_along(x)) {
+    result[i] <- x[i] + y[i]
+}
+
+```{r}
+## 1. Check that x and y have the same length
+stopifnot(length(x) == length(y))
+## 2. Create our result object
+result <- vector(mode = "integer", length = length(x)) #create result vectors
+## 3.Loop through each element of x and y, calculate the sum,
+## then store it on 'result'
+for (i in seq_along(x)) {
+    result[i] <- x[i] + y[i]
+}
+## 4.Check that we got the same answer as the result
+#of just using the R function of x+y
+identical(result, x + y)
+```
+
+**Functional loops**
+While "for loops" are perfectly valid, when you use vectorization in an element-wise fashion, there is no need for for loops because we can apply what are called functional loops.
+
+**Sometimes we'll have  complicated inputs. And we want to apply
+the same function to each of those inputs**
+
+Functional loops are functions that help us apply the same function to each entry in a vector, matrix, data frame, or list. Here are a list of them in base R:
+
+lapply(): Loop over a list and evaluate a function on each element
+
+sapply(): Same as lapply but try to simplify the result
+
+apply(): Apply a function over the margins of an array
+
+tapply(): Apply a function over subsets of a vector
+
+mapply(): Multivariate version of lapply (won’t cover)
+
+An auxiliary function split() is also useful, particularly in conjunction with lapply().
+
+**Define a function**
+function is my_sum 
+It's going to take 2 arguments "a" and "b", and inside of it it's just adding them.
+```{r}
+my_sum <- function(a, b) {
+    a + b
+}
+
+## Same but with an extra check to make sure that 'a' and 'b'
+## have the same lengths.
+my_sum <- function(a, b) {
+    ## Check that a and b are of the same length, we will provide an error, 
+    #no internal recycling
+    stopifnot(length(a) == length(b))
+    a + b
+}
+```
+
+```{r}
+
+```
+
+**Use Roxygen Skeleton** 
+Syntax that can be used to document functions
+
+Document how to use your your function with roxygen2
+Extra: document your function with roxygen2 syntax. Code (or magic wand) -> Insert Roxygen skeleton
+It lists the Title and gives space for a description and details as 3 separate paragraphs.
+In the example below, "a" is asking you "like, "what is the value of a" and then "what is the value of b" return is asking you to document what is like. 
+Then output that this function gives back to the user or returns to the user
+Export is "do you want to share this function?" Typically, yes. And so you don't have to do anything for that line.
+Then, add examples, just provide any any code that you would like to
+
+```{r}
+#' Title
+#'
+#' @param a
+#' @param b
+#'
+#' @return
+#' @export
+#'
+#' @examples
+my_sum <- function(a, b) {
+    ## Check that a and b are of the same length
+    stopifnot(length(a) == length(b))
+    a + b
+}
+```
+
+```{r}
+#' Title
+#'
+#' Description
+#'
+#' Details
+#'
+#' @param a What is `a`?
+#' @param b What is `b`?
+#'
+#' @return What does the function return?
+#' @export ## Do we want to share this function? yes!
+#'
+#' @examples
+#' ## How do you use this function?
+my_sum <- function(a, b) {
+    ## Check that a and b are of the same length
+    stopifnot(length(a) == length(b))
+    a + b
+}
+```
+
+Full example of documenting a function
+
+```{r}
+#' Sum two vectors
+#'
+#' This function does the element wise sum of two vectors.
+#'
+#' It really is just an example function that is powered by the `+` operator
+#' from [base::Arithmetic].
+#'
+#' @param a An `integer()` or `numeric()` vector of length `L`.
+#' @param b An `integer()` or `numeric()` vector of length `L`.
+#'
+#' @return An `integer()` or `numeric()` vector of length `L` with
+#' the element-wise sum of `a` and `b`.
+#' @export
+#'
+#' @examples
+#' ## Generate some input data
+#' x <- 1:10
+#' y <- 1:10
+#'
+#' ## Perform the element wise sum
+#' my_sum(x, y)
+my_sum <- function(a, b) {
+    ## Check that a and b are of the same length
+    stopifnot(length(a) == length(b))
+    a + b
+}
+```
+
+
+**More on understanding functional loops**
+
+Apply your function
+
+Here since we have two input vectors, we need to use mapply() which is one of the more complex functions. Note the weird order of the arguments where the function we will mapply() over comes before the inputs to said function.
+
+**mapply() = multivariate apply**
+This function is one you want to use when you have 2 or more inputs for your functions that you want to specify
+
+The syntax is:
+function (FUN, ..., MoreArgs = NULL, SIMPLIFY = TRUE, USE.NAMES = TRUE) 
+NULL
+
+It takes the argument FUN,or your function, then after that it has ellipse (...), where you can specify as many inputs to your function,and then it has a few other arguments or specify like how you control mapply().
+
+What it will do is is going to apply the function. In this case, my sum
+to the 1st element of x, and the 1st element of y.
+then it'll do it for the second element of X, the second element of y 3rd element and 3rd element. So you don't have to write a for loop.
+But, the sum is a vectorized function that you don't actually need to use an mapply.
+
+```{r}
+## Check the arguments to mapply()
+args(mapply)
+```
+
+Example where vector is 1:10  :
+```{r}
+## Apply mapply() to our function my_sum() with the inputs 'x' and 'y'
+mapply(sum776::my_sum, x, y)
+```
+
+ [1]  2  4  6  8 10 12 14 16 18 20
+ 
+ This solves the function sum776: mapply this function, my_sum, to my input vectors x and y.
+ X and y were vectors of the numbers one to 10.
+ 
+```{r}
+## Or write an anonymous function that is:
+## * not documented
+## * not tested
+## * not shared
+##
+## :( If you're using this your function won't be documented, tested or shared
+mapply(function(a, b) {
+    a + b
+}, x, y)
+```
+ 
+ **purrr alternative**
+The purrr package, which is part of the tidyverse, provides an alternative framework to the apply family of functions in base R.
+Both the developer and user both know what the formula and exceptions are
+purr has a of of map functions
+
+you're saying, like, I have all these different inputs.
+I'm going to map those inputs to my function. 
+And then I'm going to get a result 
+
+```{r}
+library("purrr") ## part of tidyverse
+
+## Check the arguments of map2_int()
+args(purrr::map2_int)  #map2 = 2 inputs, int = integer vector as an output
+```
+In this very particular case, We have 2 inputs.
+and the output is an integer vector
+so we're using purr.
+the appropriate function to use here would be map2_int()
+ The "2" comes from saying, we have 2 inputs and then the _int is short for underscore integer
+
+Example:
+```{r}
+## Apply our function my_sum() to our inputs
+purrr::map2_int(x, y, sum776::my_sum)
+```
+ [1]  2  4  6  8 10 12 14 16 18 20
+ 
+In this case, we're using X and Y as inputs to our function my_sum. 
+The order of the inputs here change compared to the mapply.
+Here we're providing the x and y inputs first, then we're provided a function at the end
+```{r}
+## You can also use anonymous functions
+purrr::map2_int(x, y, function(a, b) {
+    a + b
+})
+```
+ 
+ 
+```{r}
+## purrr even has a super short formula-like syntax
+## where .x is the first input and .y is the second one
+purrr::map2_int(x, y, ~ .x + .y)
+```
+
+Above is an anonymous function example. anonymous functions are not documented, not tested, not shared.
+It also has a very short syntax a formula like syntax, which you use the Tilde operator (~).
+and then you have something called the ".x" and the ".y".
+Those are like the dot. X represents the 1st argument of your map function call, and the dot y represents the second one. 
+It has nothing to do with  the inputs being called x and y, (e.g. 1:2 nd 3:4). 
+You still use the syntax of ".x" and  ".y".
+```{r}
+## This formula syntax has nothing to do with the objects 'x' and 'y'
+purrr::map2_int(1:2, 3:4, ~ .x + .y)
+```
+
+
+**Base R loops**
+
+**List Apply and typically returns a list**
+
+**lapply** only takes as input a list. 
+The M for mapply was for multivariate. 
+The L in L **lapply** is going to be for "list apply"
+It takes the inputted list and applies a function to each element of that list.
+And typically returns a list
+
+The arguments for lapply takes "x",your input, 
+and then the second argument is your function (FUN).
+
+```{r}
+lapply()
+```
+function (X, FUN, ...) 
+{
+    FUN <- match.fun(FUN)
+    if (!is.vector(X) || is.object(X)) 
+        X <- as.list(X)
+    .Internal(lapply(X, FUN))
+}
+<bytecode: 0x15c1335d0>
+<environment: namespace:base>
+
+The lapply() function does the following simple series of operations:
+
+it loops over a list, iterating over each element in that list
+it applies a function to each element of the list (a function that you specify)
+and returns a list (the l in lapply() is for “list”).
+This function takes three arguments: (1) a list X; (2) a function (or the name of a function) FUN; (3) other arguments via its ... argument. If X is not a list, it will be coerced to a list using as.list().
+
+The body of the lapply() function can be seen here.
+ 
+f <- function(a, b) {
+  a^2
+}
+f(2)
+
+
+**Here’s an example of lapply** applying the mean() function to all elements of a list. If the original list has names, the the names will be preserved in the output.
+a = the numbers 1 thru 5 and b = 10 randomly generated numbers
+```{r}
+x <- list(a = 1:5, b = rnorm(10))
+x
+```
+```{r}
+lapply(x, mean)
+```
+Notice that here we are passing the mean() function as an argument to the lapply() function.
+We see the mean of the "a" values and a mean of the "b" values as output
+
+
+Similarly, with purr, the map function, takes us input as a list. 
+But if you use "map_Dbl", short for double which is how  numbers with decimals are stored.
+Now we get a numeric vector with the outputs of those means.
+```{r}
+purrr::map_dbl(x, mean)
+```
+
+What difference do you notice in terms of the output of lapply() and purrr::map_dbl()?
+```{r}
+purrr::map(x, mean)
+```
+
+
+Below is another example of using lapply().
+this example is a lot longer where we have a list called X, 
+where the 1st element is "a", has 4 numbers. B has 10 numbers. C has
+20 numbers. D has a hundred numbers.
+It didn't really matter that we had, increasing number of elements in our
+of lengths in the elements of our list. "x" with "lapply" still works
+```{r}
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+lapply(x, mean)
+```
+
+You can use lapply() to evaluate a function multiple times each with a different argument.
+
+Next is an example where I call the runif() function (to generate uniformly distributed random variables) four times, each time generating a different number of random numbers.
+In this example, we want to get different lengths
+
+```{r}
+x <- 1:4
+lapply(x, runif)
+```
+Lot of times we think about "lapply" as input only  as lists. But it can also take as input a vector and just return a list.
+
+When you pass a function to lapply(), lapply() takes elements of the list and passes them as the first argument of the function you are applying.
+
+In the above example, the first argument of runif() is n, and so the elements of the sequence 1:4 all got passed to the n argument of runif().
+
+
+This also works with purrr functions.
+But it's just called "map". Can take a input as a list or vector and returns a list as output
+
+```{r}
+purrr::map(x, runif)
+```
+Here is where the argument to lapply() comes into play. Any arguments that you place in the argument will get passed down to the function being applied to the elements of the list.
+
+Below, we want to get between one and 4 random numbers from the uniform distribution (runif), but we want them to have a minimum value of 0 and a maximum of 10
+
+Here, the min = 0 and max = 10 arguments are passed down to runif() every time it gets called.
+
+In runif(), the default numbers for Min is 0, and Max is 10.
+You can specify the values to some arguments that you want and use the same value for every iteration.
+
+```{r}
+x <- 1:4  #want btwn 1 and 4 random numbers
+lapply(x, runif, min = 0, max = 10)
+```
+The same thing can be done with with purr map. Ii is the same is the same syntax - input function ,  other name arguments that you want to use for your function.
+
+So now, instead of the random numbers being between 0 and 1 (the default), the are all between 0 and 10. Again, this also works with purrr functions.
+
+```{r}
+purrr::map(x, runif, min = 0, max = 10)
+```
+**sapply()**
+Simplify
+The sapply() function behaves similarly to lapply(); the only real difference is in the return value. sapply() will try to simplify the result of lapply() if possible. Essentially, sapply() calls lapply() on its input and then applies the following algorithm:
+
+If the result is a list where every element is length 1, then a vector is returned
+
+If the result is a list where every element is a vector of the same length (> 1), a matrix is returned.
+
+If it can’t figure things out, a list is returned
+
+This can be a source of many headaches and one of the main motivations behind the purrr package. With purrr you know exactly what type of output you are getting!
+
+Here’s the result of calling lapply(). With different lengths
+```{r}
+x <- list(a = 1:4, b = rnorm(10), c = rnorm(20, 1), d = rnorm(100, 5))
+lapply(x, mean)
+```
+
+So if we use **S apply** we get a vector.
+because R knows that all of these things are of length one.
+so they can be simplified to a vector
+
+```{r}
+sapply(x, mean)
+```
+
+**With purrr**, if I want a list output, I use map(). 
+If I want a double (numeric) output, we can use map_dbl().
+
+```{r}
+purrr::map(x, mean)
+```
+
+```{r}
+purrr::map_dbl(x, mean)
+```
+
+**split()**
+All of the apply functions can be combined with the function, split.
+
+The split() function takes a vector or other objects and splits it into groups determined by a factor or list of factors.
+
+The arguments to split() are
+```{r}
+str(split)
+```
+where x is a vector (or list) or data frame
+f is a factor (or coerced to one) or a list of factors
+factors are categorical variables or a list of factors.
+drop indicates whether empty factors levels should be dropped
+
+The combination of split() and a function like lapply() or sapply() is a common paradigm in R. The basic idea is that you can take a data structure, split it into subsets defined by another variable, and apply a function over those subsets. The results of applying that function over the subsets are then collated and returned as an object. This sequence of operations is sometimes referred to as “map-reduce” in other contexts.
+
+This is how we go from a data frame to a list, we use a split function for that and now that you have a list, then you can like use some apply functions.
+
+Let's say a data frame and you have a column, let's say country.
+You can split your data into a list that now every element of the list will be the data for country one country, 2, country, 3, etc.
+So it's similar to the "group by" function from dplyr 
+
+Here we simulate some data and split it according to a factor variable. Note that we use the gl() function to “generate levels” in a factor variable.
+
+Example: We have random numbers. 10 random numbers from the normal distribution, 10 random numbers from the uniform distribution, and then 10 random numbers from the normal distribution with a mean of one
+
+Now we have the actual values of X that were split.
+So since we split it by the groups, now we can compute the mean 
+
+we SL apply or as apply if you want to.
+
+So here we get. Now the means,  3 different means.
+
+```{r}
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+f <- gl(3, 10) # generate factor levels 3 groups with 10 observations each
+f
+```
+we'll used the gl function to like generate levels,  3 different groups. 
+Each of the groups has 10 observations, so that just creates this little factor called "f", where the 1st 10 values are ones, next 10 values are twos & last 10 are threes.
+So now we have both a vector input (x) and a factor input (f) that are equal lengths.
+
+```{r}
+split(x, f)
+```
+So we can use the split function. We split and we get a list. 
+We now have a list for the 1st element of the list called $1. From this, the 1st level of the factor (f),
+then the second element of the list is called $2. That's the second level of (f), etcetera inside of it we have the values of "x" that were split by group.
+
+A common idiom is split followed by an lapply.
+
+since we split it by the groups, we can compute the mean with "lapply"
+So we get the 3 different means - one for each of the 3 groups we created
+
+These were random numbers, we didn't specify a seed.
+```{r}
+lapply(split(x, f), mean)
+```
+If you run again, you get a different value because we asked for random numbers, not a "seed"
+
+**Splitting a Data Frame**
+This data frame is called air quality and has these variables:
+ozone, solar wind temperature month and day.
+```{r}
+library("datasets")
+head(airquality)
+```
+**Split data by months**
+Month is our group variable. and we will split it so that we have separate sub-data frames for each month.
+We provide as input (x), the whole data frame "airquality", and then for (f), we specify the the "Month" variable.
+
+```{r}
+s <- split(airquality, airquality$Month)
+str(s)
+```
+We get a list of length 5. Because we have data for 5 unique months in this air quality data set. the 1st element is called $5, the second is called $6, then the 3rd is called $7, 4th is $8, and the 5th one is called 9.
+We can see that we have a data frame stored as each of the elements of this list.
+
+Once we've done this, kind of like "groupby", now we can compute the the column means of the variables, ozone, solar, r and wind. 
+We use the function "colMeans" for that
+
+Then we can take the column means for Ozone, Solar.R, and Wind for each sub-data frame.
+
+```{r}
+lapply(s, function(x) {
+    colMeans(x[, c("Ozone", "Solar.R", "Wind")])
+})
+```
+We get 3 different means for those those 3 variables. It has 5 elements named 5, 6, 7, 8, and 9.
+And each of those elements is a named vector that has the 3 different means.
+
+
+Using sapply() might be better here since R recognizes that all of these elements of the output list have the same length 
+sapply gives us a more readable output. 
+Puts it into a matrix
+
+```{r}
+sapply(s, function(x) {
+    colMeans(x[, c("Ozone", "Solar.R", "Wind")])
+})
+```
+We get a matrix where we have the 3 different variables as a rows.
+the 5 different input groups for a month as the columns. And we get a table
+
+We see NAs because we are missing data
+Unfortunately, there are NAs (missing observations) in the data so we cannot simply take the means of those variables. However, we can tell the colMeans function to remove the NAs before computing the mean.
+specify "na.rm = TRUE" inside of colMeans.
+Then we get the means after removing the missing observations.
+
+```{r}
+sapply(s, function(x) {
+    colMeans(x[, c("Ozone", "Solar.R", "Wind")],
+        na.rm = TRUE
+    )
+})
+```
+
+We can also do this with purrr as shown below.
+purr "map" will return a list with 5 elements.
+But not simplified or returned into a data frame
+```{r}
+purrr::map(s, function(x) {
+    colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE)
+})
+```
+
+Or use the currently supported function purrr::list_cbind(). Though we also need to do a bit more work behind the scenes.
+```{r}
+## Make sure we get data.frame / tibble outputs for each element
+## of the list
+purrr:::map(s, function(x) {
+    tibble::as_tibble(colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE))
+})
+```
+
+**R recommends using the "list_cbind" to combine the different columns**
+```{r}
+## Now we can combine them with list_cbind()
+purrr:::map(s, function(x) {
+    tibble::as_tibble(colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE))
+}) 
+purrr::list_cbind()
+```
+
+
+```
+
+```{r}
+## And we can then add the actual variable it came from with mutate()
+purrr:::map(s, function(x) {
+    tibble::as_tibble(colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE))
+}) %>%
+    purrr::list_cbind() %>%
+    dplyr::mutate(Variable = c("Ozone", "Solar.R", "Wind"))
+```
+# A tibble: 3 × 6
+  `5`$value `6`$value `7`$value `8`$value `9`$value Variable
+      <dbl>     <dbl>     <dbl>     <dbl>     <dbl> <chr>   
+1      23.6      29.4     59.1      60.0       31.4 Ozone   
+2     181.      190.     216.      172.       167.  Solar.R 
+3      11.6      10.3      8.94      8.79      10.2 Wind  
+
+But, all of these versions are they're not tidy because we don't have like one row per observation. 
+We just have this, all of the data in the wide format.
+
+So, we’ll use the t() function for transposing a vector and purrr:list_rbind().
+```{r}
+## Get data.frame / tibble outputs, but with each variable as a separate
+## column. Here we used the t() or transpose() function.
+purrr:::map(s, function(x) {
+    tibble::as_tibble(t(colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE)))
+})
+```
+
+head(airquality)
+
+```{r}
+## Now we can row bind each of these data.frames / tibbles into a
+## single one
+purrr:::map(s, function(x) {
+    tibble::as_tibble(t(colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE)))
+}) %>% purrr::list_rbind()
+```
+
+
+```{r}
+## Then with mutate, we can add the Month back
+purrr:::map(s, function(x) {
+    tibble::as_tibble(t(colMeans(x[, c("Ozone", "Solar.R", "Wind")], na.rm = TRUE)))
+}) %>%
+    purrr::list_rbind() %>%
+    dplyr:::mutate(Month = as.integer(names(s)))
+```
+
+For the above task though, we might prefer to use dplyr functions.
+
+```{r}
+## group_by() is in a way splitting our input data.frame / tibble by
+## our variable of interest. Then summarize() helps us specify how we
+## want to use that data, before it's all put back together into a
+## tidy tibble.
+airquality %>%
+    dplyr::group_by(Month) %>%
+    dplyr::summarize(
+        Ozone = mean(Ozone, na.rm = TRUE),
+        Solar.R = mean(Solar.R, na.rm = TRUE),
+        Wind = mean(Wind, na.rm = TRUE)
+    )
+```
+
+
+**tapply**
+Table apply
+Shortcut for tapply() is used to apply a function over subsets of a vector. It can be thought of as a combination of split() and sapply() for vectors only. I’ve been told that the “t” in tapply() refers to “table”, but that is unconfirmed.
+So this is kind of like a shortcut, for like splitting, then lapplying or 
+sapplying, so it's a short code for that.
+
+```{r}
+str(tapply)
+```
+
+Given a vector of numbers, one simple operation is to take group means.
+
+```{r}
+## Simulate some data
+x <- c(rnorm(10), runif(10), rnorm(10, 1))
+## Define some groups with a factor variable
+f <- gl(3, 10)
+f
+```
+```{r}
+tapply(x, f, mean)
+```
+[1] 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 3 3 3 3 3 3 3 3 3 3
+Levels: 1 2 3
+
+> tapply(x, f, mean)
+         1          2          3 
+-0.4384190  0.4017609  1.2924346 
+
+**apply()**
+The apply() function is used to a evaluate a function (often an anonymous one) over the margins of an array. It is most often used to apply a function to the rows or columns of a matrix (which is just a 2-dimensional array). However, it can be used with general arrays, for example, to take the average of an array of matrices. Using apply() is not really faster than writing a loop, but it works in one line and is highly compact.
+
+```{r}
+str(apply)
+```
+The arguments to apply() are
+
+X is an array
+MARGIN is an integer vector indicating which margins should be “retained”.
+FUN is a function to be applied
+... is for other arguments to be passed to FUN
+
+
+**Col/Row Sums and Means**
+
+They're very fast versions of applying and computing the sum or the mean across the rows or the columns.  
+
+Pro-tip
+For the special case of column/row sums and column/row means of matrices, we have some useful shortcuts.
+
+rowSums = apply(x, 1, sum)
+rowMeans = apply(x, 1, mean)
+colSums = apply(x, 2, sum)
+colMeans = apply(x, 2, mean)
+
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+
+Here’s an example of a function that computes the sum of squares given some data, a mean parameter and a standard deviation.
+
+Let's say, we have this function over here.
+where we take a vector, of observations in X.
+But then we want to subtract a specific, mean value for each of those observations. 
+Square them, then, divided by specific variance or a standard deviation square.
+so we'll call this specific, mean letter "mu", and we'll call the specific variance letter "sigma".
+
+This function takes a mean mu, a standard deviation sigma, and some data in a vector x.
+mu and sigma are length 1 and x is numeric vector of any size
+
+```{r}
+sumsq <- function(mu, sigma, x) {
+    sum(((x - mu) / sigma)^2)
+}
+```
+
+
+In many statistical applications, we want to minimize the sum of squares to find the optimal mu and sigma. Before we do that, we may want to evaluate or plot the function for many different values of mu or sigma.
+
+```{r}
+x <- rnorm(100) ## Generate some data of 100 values from a normal distribution
+sumsq(mu = 1, sigma = 1, x) ## This works (returns one value)
+```
+
+[1] 237.9254
+
+We use our function "sumsq" where we say we want to compare against a mean of one and a standard deviation of one.
+
+What would happen if we had a different set of mus and a different set of sigmas, like a range of them that we want to explore with. 
+
+Passing a vector of mus or sigmas won’t work with this function because it’s not vectorized.
+
+```{r}
+sumsq(1:10, 1:10, x) ## This is not what we want
+```
+[1] 115.7084
+
+Mu was a vector one to 10. Sigma is a vector, one to 10. and then our data is x has a hundred numbers.
+
+
+What we wanted was to get a result for some square, or the case where mu is one sigma is one
+then the case when mu is 2 sigma is 2... all the way up to where mu is 10 and sigma is 10
+
+We can do this with a "for loop"
+
+```{r}
+res <- vector("numeric", length = 10L)
+for(i in 1:10) {
+res[i] <- sumsq(mu = i, sigma = i, x = x)
+}
+res
+```
+[1] 237.9254 141.8623 121.8859 114.1561 110.2408 107.9318 106.4300 105.3843 104.6187 104.0364
+
+And we get teh results we want
+
+There’s also a function in R called Vectorize() that automatically can create a vectorized version of your function.
+
+So we could create a vsumsq() function that is fully vectorized as follows.
+
+```{r}
+vsumsq <- Vectorize(sumsq, c("mu", "sigma"))
+vsumsq(1:10, 1:10, x)
+```
+ [1] 237.9254 141.8623 121.8859 114.1561 110.2408 107.9318 106.4300 105.3843 104.6187 104.0364
+ 
+ The same result as the "for loop"
+
+
+```{r}
+## The details are a bit complicated though
+## as we can see below
+vsumsq
+```
+ What this is doing is like, it's actually using the L apply and a bunch of different things. And then Mapplying it and then giving you the back the results. 
+ So you didn't have to actually write the mapply code and the lapply code, and all of that.
+ 
+ function (mu, sigma, x) 
+{
+    args <- lapply(as.list(match.call())[-1L], eval, parent.frame())
+    names <- names(args) %||% character(length(args))
+    dovec <- names %in% vectorize.args
+    do.call("mapply", c(FUN = FUN, args[dovec], MoreArgs = list(args[!dovec]), 
+        SIMPLIFY = SIMPLIFY, USE.NAMES = USE.NAMES))
+}
+<environment: 0x00000289e44edb48>
+
+
+
+#| error: true
+f <- function(a, b) {
+  print(a)
+  print(b)
+}
+f(45)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+mean
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+paste("one", "two", "three")
+paste("one", "two", "three", "four", "five", sep = "_")
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+args(paste)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+args(paste)
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+paste("a", "b", sep = ":")
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+paste("a", "b", se = ":")
+
+
+## ------------------------------------------------------------------------------------------------------------------------
+#| eval: false
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
